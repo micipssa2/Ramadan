@@ -1199,19 +1199,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function initFirebase() {
   try {
-    if (FIREBASE_CONFIG.apiKey === "VOTRE_API_KEY") {
+    // ✅ CORRECTION: utiliser firebaseConfig (minuscules) au lieu de FIREBASE_CONFIG
+    if (firebaseConfig.apiKey === "VOTRE_API_KEY") {
       console.warn("⚠️ Firebase non configuré — Mode démonstration");
       showToast("📱 Mode démo — Configurez Firebase pour la prod");
       initDemoMode();
       return;
     }
-    firebase.initializeApp(FIREBASE_CONFIG);
+    firebase.initializeApp(firebaseConfig); // ✅ firebaseConfig (minuscules)
     db = firebase.firestore();
     auth = firebase.auth();
     storage = firebase.storage();
     firebaseReady = true;
 
-    // Auto-reconnexion
     auth.onAuthStateChanged(async (user) => {
       if (user) {
         currentUser = user;
@@ -1221,7 +1221,6 @@ function initFirebase() {
       }
     });
 
-    // Nettoyage auto des lieux non confirmés > 7 jours
     scheduleCleanup();
   } catch (e) {
     console.error("Firebase init error:", e);
