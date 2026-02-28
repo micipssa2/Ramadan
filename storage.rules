@@ -1,0 +1,16 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Photos des lieux
+    match /photos/{allPaths=**} {
+      // Tout le monde peut voir les photos
+      allow read: if true;
+      
+      // Seuls les connectés peuvent uploader
+      // Max 5 Mo, images seulement
+      allow write: if request.auth != null
+                   && request.resource.size < 5 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+    }
+  }
+}

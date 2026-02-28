@@ -1,0 +1,40 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ═══ USERS ═══
+    // Tout utilisateur connecté peut lire les profils
+    // Seul le propriétaire peut modifier son profil
+    match /users/{userId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && request.auth.uid == userId;
+      allow update: if request.auth != null && request.auth.uid == userId;
+      allow delete: if false;
+    }
+
+    // ═══ LOCATIONS ═══
+    // Tout le monde peut voir les lieux (même non connecté)
+    // Seuls les connectés peuvent ajouter/modifier
+    // Personne ne peut supprimer (le cleanup se fait côté serveur)
+    match /locations/{locationId} {
+      allow read: if true;
+      allow create: if request.auth != null
+                    && request.resource.data.nom is string
+                    && request.resource.data.nom.size() > 0
+                    && request.resource.data.lat is number
+                    && request.resource.data.lng is number
+                    && request.resource.data.wilaya is string;
+      allow update: if request.auth != null;
+      allow delete: if false;
+    }
+
+    // ═══ CONFIRMATIONS ═══
+    // Connectés peuvent lire et écrire
+    match /confirmations/{confirmId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null
+                    && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if false;
+    }
+  }
+}
